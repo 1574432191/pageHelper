@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"      
+ "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+ <mapper namespace="com.lishan.gjq.item.ItemDao">
+ 
+ <!--最新的商品  -->
+ 	<select id="findItemByNew" resultType="com.lishan.gjq.item.Item">
+ 	select * from goods order by production_date desc limit 0,10
+ 	</select>
+ 	<!--最热的商品  -->
+ 	<select id="findItemByHot" resultType="com.lishan.gjq.item.Item">
+ 	select * from goods order by hot desc limit 0,10
+ 	</select>
+ 	<!--查找所有的商品，并进行分页展示  -->
+	<select id="findItem" resultType="com.lishan.gjq.item.Item">
+	select * from goods order by id
+	</select>
+	<!--查找总记录数  -->
+	<select id="findCount" resultType="int">
+	select count(*) from goods order by id
+	</select>
+	<!--分页显示所有的商品  -->
+	<select id="findByCount" parameterType="int" resultType="com.lishan.gjq.item.Item" >
+	select * from goods order by id limit ${start},8
+	</select>
+	<!--根据id查找商品，显示商品详情  -->
+	<select id="findItemById" parameterType="int" resultType="com.lishan.gjq.item.Item">
+	select * from goods where id=#{id}
+	</select>
+	<!--后台分页查询  -->
+	<select id="findCount5" parameterType="int" resultType="com.lishan.gjq.item.Item">
+	select * from goods where status=1 order by id  limit ${start},5
+	</select>
+	<!--查找上架总记录数  -->
+	<select  id="findAllCount"  resultType="int">
+	select count(*) from goods where status=1
+	</select>
+	<!--下架商品  -->
+	<update  id="updateStatus" parameterType="int">
+	   update goods set status=0 where id=#{id}
+	</update>
+	<!--下架商品列表  -->
+	<select id="findItemByStstus" resultType="com.lishan.gjq.item.Item" parameterType="int">
+	select * from goods where status = 0  order by id  limit ${start},5
+	</select>
+	<!--查询下架商品的记录数  -->
+	<select id="findCountByStatus"  resultType="int">
+	select count(*) from goods where status=0
+	</select>
+	<!--商品上架  -->
+	<update id="upItemSatus" parameterType="int">
+		 update goods set status=1 where id=#{id}
+	</update>
+	<!--添加商品  -->
+	<insert id="insertItems" parameterType="com.lishan.gjq.item.Item">
+	insert into goods values(null,#{name},#{marketprice},#{estoreprice},#{category_id},
+	#{num},#{titleimage},#{description},null,#{production_date},#{expiry_date},1)
+	</insert>
+	<!--分类显示商品  -->
+	<select id="findItemByCate" parameterType="int" resultType="com.lishan.gjq.item.Item">
+	 select * from goods where category_id=#{category_id} 
+	</select>
+ </mapper>

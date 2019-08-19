@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"      
+ "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+ <mapper namespace="com.lishan.gjq.order.OrderDao">
+
+ 
+    <!--添加订单到orderitems ,这里可能一次要添加多条数据，要使用foreach标签 -->
+    <insert id="insertOrderItems" parameterType="java.util.List">
+    insert into orderitems values
+     <foreach collection="list" item="orderItems" separator=",">
+     (#{orderItems.oid},#{orderItems.gid},#{orderItems.buynum})
+     </foreach>
+    </insert>
+    <!--将订单信息添加到信息表即order表  -->
+    <insert id="insertOrder" parameterType="com.lishan.gjq.order.Order">
+    insert into orders 
+    values(#{id},#{uid},#{totalprice},#{address},#{status},#{createtime},#{receivename},#{phone},null)
+    </insert>
+    <!--确认是否添加订单成功  -->
+    <select id="makeSureOrder" parameterType="string" resultType="com.lishan.gjq.order.OrderItems">
+    	select * from orders o,orderitems oi where o.id=oi.oid
+    	and o.id=#{id}
+    </select>
+    
+    <!--订单添加成功后，显示订单的目录  -->
+    <select id="findAllOrder" parameterType="int" resultType="com.lishan.gjq.order.Order">
+       select * from orders where uid=#{uid}
+    </select>
+    <!--查询订单详情  -->
+    <resultMap id="findOrderItemListMap" type="com.lishan.gjq.order.OrderItems">
+    	<result property="oid" column="oid"/>
+    	<result property="gid" column="gid"/>
+    	<result property="buynum" column="buynum"/>
+    	<association property="item" javaType="com.lishan.gjq.item.Item">
+    		<id property="id" column="id"/>
+    		<result property="name" column="name"/>
+    		<result property="estoreprice" column="estoreprice"/>
+    		<result property="titleimage" column="titleimage"/>
+    	</association>
+    </resultMap>
+    <select id="findOrderItemList" parameterType="com.lishan.gjq.order.Order" resultMap="findOrderItemListMap">
+    	select oid,gid,buynum,name,estoreprice,titleimage from orders inner join
+    	orderitems on orders.id=orderitems.oid inner join goods on
+    	orderitems.gid=goods.id where orders.uid=#{uid} and orders.id=#{id}
+    </select>
+    <!-- 根据订单的id 查询订单 -->
+    <select id="findOrderItemsById" parameterType="string" resultType="com.lishan.gjq.order.Order">
+    select * from orders where id=#{id}
+    </select>
+    <!--删除订单  -->
+    <delete id="deleteOrder" parameterType="string">
+      delete o,oi from orders o,orderitems oi  where o.id=oi.oid and o.id=#{id}
+    </delete>
+    <!-- 支付成功之后修改订单信息 -->
+<update parameterType="com.lishan.gjq.order.Order" id="updateOrder">
+ update orders set status=#{status},trade_no=#{trade_no} where id=#{id}
+  </update>
+  <!--查询所有的订单  -->
+  <select id="findAll" resultType="com.lishan.gjq.order.Order">
+  select * from orders 
+  </select>
+ </mapper>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"      
+ "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+ <mapper namespace="com.lishan.gjq.admin.AdminDao">
+ <select id="findByUsername" parameterType="string" resultType="com.lishan.gjq.admin.Admin">
+  select * from admin where username=#{username} and status=1
+ </select>
+ <!--后台主页面展示，根据不同的角色显示不同的内容  -->
+ <resultMap type="com.lishan.gjq.admin.Admin" id="admin">
+ 	<id property="id" column="id"/>
+ 	<result property="username" column="username"></result>
+ 	<result property="password" column="password"></result>
+ 	<result property="name" column="name"></result>
+ 	<result property="age" column="age"></result>
+ 	<result property="sex" column="sex"></result>
+ 	<result property="status" column="status"></result>
+ 	<association property="role" javaType="com.lishan.gjq.admin.Role">
+    		<id property="id" column="id"/>
+    		<result property="roles" column="roles"/>
+    	</association>
+ </resultMap>
+ <!--查看所有员工信息  -->
+ <select id="findEmp" resultMap="admin">
+ select * from admin a,role r where a.rid=r.id and a.status=1
+ </select>
+ <!--后台个人信息展示  -->
+ <select id="findInfo" parameterType="string" resultMap="admin">
+  select * from admin a,role r where username=#{username} and a.rid=r.id and status=1
+ </select>
+ <!--员工信息管理 -->
+ <!--修改密码  -->
+ <update id="updatePassword" parameterType="com.lishan.gjq.admin.Admin">
+ update admin set password=#{password} where id=#{id}
+ </update>
+ <!--添加员工  -->
+<insert id="addEmps" parameterType="com.lishan.gjq.admin.Admin">
+insert into admin values(null,#{username},#{password},1,#{rid},#{name},#{age},#{sex})
+</insert>
+<!--删除员工  -->
+<select id="delectEmps" parameterType="int">
+delete from admin where id=#{id}
+</select>
+<!--修改职位名称  -->
+<update id="updateRole" parameterType="com.lishan.gjq.admin.Admin">
+ update admin set rid=#{rid} where id=#{id}
+</update>
+ </mapper>

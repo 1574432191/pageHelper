@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"      
+ "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+ <mapper namespace="com.lishan.gjq.user.UserDao">
+ <!-- <resultMap type="com.gjq.pojo.User" id="user"> -->
+ <!-- column指的是数据库中表的字段名
+ 	  property指的是java实体类的属性
+ 	  id标签为数据库中主键的属性
+ 	  result为其他属性
+  -->
+ <!-- 	<id column="id" property="id"></id>
+ 	<result column="username" property="userName"></result>
+ 	<result column="password" property="passWord"></result>
+ </resultMap>
+    通过parameterType指定输入参数的类型      
+ 	<select id="findAll" parameterType="string"
+ 	resultType="com.lishan.gjq.user.User">
+ 	select * from users 
+ 	</select> -->
+ 	<!--#{}实现向prepareStatement中的预处理语句中设置参数值，sql 语句中#{}
+ 	表示一个占位符 。使用占位符可以防止sql的注入，在使用时不需要关心参数的类型。
+ 	mybatis会自动的进行Java与jdbc的转换。#{}可以接受简单类型和pojo的属性值。
+ 	如果parameterType中指定的单个的简单类型。#{}中可以使用value或是其它值-->
+ 	<!--#{}与${}的不同 
+ 	通过${}可以将parameterType传入的内容拼接在sql中，并且不进行jdbc类型转换
+ 	${}可以接受简单类型和pojo的属性值。若parameterType为单个简单类型时，${}中
+ 	必须使用value。使用${}不能防止sql注入，但有时会很方便
+ 	 -->
+ 	<insert id="reg" parameterType="com.lishan.gjq.user.User">
+ 	insert into users values(null,#{username},#{password},#{name},#{email},null,#{birthday},#{sex},#{address},null,null,0)
+ 	</insert>
+ 	<select id="findByUserName" parameterType="string" resultType="com.lishan.gjq.user.User">
+ 	select * from users where username=#{username} 
+ 	</select>
+ 	<select id="login" parameterType="string" resultType="com.lishan.gjq.user.User">
+ 	select * from users where stat=1 and (username=#{username} and password=#{password})
+ 	</select>
+ 	<!--邮箱激活  -->
+ 	<update id="emailActive" parameterType="string">
+ 	update users set stat = 1 where username=#{username}
+ 	</update>
+ 	<!--查看用户的状态  -->
+ 	<select id="findStat" parameterType="string" resultType="int">
+ 	select stat from users where username=#{username}
+ 	</select>
+ 	<!--根据邮箱修改密码  -->
+ 	<select id="findByEmail" parameterType="string" resultType="com.lishan.gjq.user.User">
+ 	select *from users where email=#{email}
+ 	</select>
+ 	<!--修改密码  -->
+ 	<update id="updatePassword" parameterType="string">
+ 	update users set password=#{password}  where username=#{username}
+ 	</update>
+ 	<!--查看个人信息  -->
+ 	<select id="findUserById" parameterType="int" resultType="com.lishan.gjq.user.User">
+ 	select * from users where id=#{id}
+ 	</select>
+ 	<select id="findPassword" parameterType="string" resultType="string">
+ 	 select password from users where username=#{username}
+ 	</select>
+ 	<update id="updateUser" parameterType="com.lishan.gjq.user.User">
+ 	update users set email=#{email},name=#{name},sex=#{sex},birthday=#{birthday} ,address=#{address}
+ 	where id=#{id}
+ 	</update>
+ 	<update id="insertUserPhoto" parameterType="com.lishan.gjq.user.User">
+ 	update users set photo=#{photo} where id=#{id}
+ 	</update>
+ 	<insert id="insertPhoto" parameterType="com.lishan.gjq.photo.Photo">
+ 	insert into photo values(null,#{uid},#{photo},#{time})
+ 	</insert>
+ 	<!--查看历史图片  -->
+ 	<select id="findPhoto" parameterType="int" resultType="com.lishan.gjq.photo.Photo">
+ 	   select DISTINCT photo from photo where uid=#{uid}
+ 	</select>
+ 	<!--添加收货地址  -->
+ 	<insert id="addAddress" parameterType="com.lishan.gjq.user.Addres">
+ 	insert into address values(null,#{uid},#{address},#{createTime})
+ 	</insert>
+ 	<!--相同地址不能重复填写  -->
+ 	<select id="findAddressByUid" parameterType="com.lishan.gjq.user.Addres" resultType="com.lishan.gjq.user.Addres">
+ 	select * from address where uid=#{uid} and address=#{address} order by createTime asc limit 0,5
+ 	</select>
+ 	<!--查看近期所保留的地址前五个  -->
+ 	<select id="findAddressOrderByTime" parameterType="int" resultType="com.lishan.gjq.user.Addres"> 
+ 	select * from address where uid=#{uid} order by createTime asc limit 0,5
+ 	</select>
+ 	<!--单个删除地址  -->
+ 	<delete id="deleteAddress" parameterType="int">
+ 	delete from address where id=#{id}
+ 	</delete>
+ 	<!--查找所有地址  -->
+ 	<select id="findAllAddress" resultType="com.lishan.gjq.user.Addres">
+ 	select * from address where uid=#{uid}
+ 	</select>
+ 	<!--通过手机号查找用户登录  -->
+ 	<select id="findByPhone" parameterType="string" resultType="com.lishan.gjq.user.User">
+ 	select * from users where phone=#{phone}
+ 	</select>
+ </mapper>

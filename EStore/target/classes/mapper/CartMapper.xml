@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"      
+ "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+ <mapper namespace="com.lishan.gjq.cart.CartDao">
+ <!--
+ 		resultMap标签是为了映射select查询出来的结果集合，主要作用是将实体类中的字段与数据库中的字段进行关系映射
+ 		当实体类中的字段与数据库表中的字段相同时，可以将resultMap标签中的关联关系忽略不写。
+ 		当实体类中的字段与数据库表中的字段不相同时，就需要在resultMap标签中将实体类字段与数据库表字段一一进行关联映射
+   -->
+ <resultMap type="com.lishan.gjq.cart.Cart" id="cart">
+      <result column="uid" property="uid"/>
+      <result column="gid" property="gid"/>
+      <result column="buynum" property="buynum"/>
+ 	<association property="item" javaType="com.lishan.gjq.item.Item">
+ 		<id column="id" property="id"/>
+        <result column="titleimage" property="titleimage"/>
+        <result column="estoreprice" property="estoreprice"/>
+        <result column="name" property="name"/>
+ 	</association>
+ 
+ </resultMap>
+    <!--添加购物车  -->
+ 	<insert id="addCart" parameterType="com.lishan.gjq.cart.Cart">
+ 	insert into cart(uid,gid,buynum) values(#{uid},#{gid},#{buynum})
+ 	</insert>
+ 	<!--修改商品数量，相同商品合并  -->
+ 	<update id="updateItemNum" parameterType="com.lishan.gjq.cart.Cart">
+ 	update cart set buynum=#{buynum} where (uid=#{uid} and gid=#{gid})
+ 	</update>
+ 	<select id="findByPidAndUid" parameterType="int" resultType="com.lishan.gjq.cart.CartInfo">
+ 	SELECT * from cart c ,goods g WHERE c.gid=g.id AND c.uid=#{uid}
+ 	</select>
+ 	<!-- 查看是否有存在该商品 -->
+ 	<select id="findSame" parameterType="int" resultType="com.lishan.gjq.cart.Cart">
+ 	select * from cart where  (uid=#{uid} and gid=#{gid})
+ 	</select>
+ 	<!--查看商品数量  -->
+ 	<select id="findBynum" parameterType="int" resultType="int">
+ 	select buynum from cart where (uid=#{uid} and gid=#{gid})
+ 	</select>
+ 	<!--购物车总体页数  -->
+ 	<select id="findCount" parameterType="int" resultType="int" >
+ 	 select count(*) from cart where uid=#{uid}
+ 	 </select>
+ 	 <!--分页显示购物车物品  -->
+ 	 <select id="findFY" parameterType="int" resultType="com.lishan.gjq.cart.CartInfo">
+ 	 SELECT * from cart c ,goods g WHERE c.gid=g.id AND c.uid=#{uid} order by gid limit ${start},6
+ 	 </select>
+ 	 <!--清空购物车  -->
+ 	 <delete id="deleteAllCart" parameterType="int">
+ 	 delete  from cart where uid=#{uid}
+ 	 </delete>
+ 	 <!--删除购物车里的某一个信息  -->
+ 	 <delete id="deleteCart" parameterType="int">
+ 	 delete  from cart where (uid=#{uid} and gid=#{gid})
+ 	 </delete>
+ 	 
+ 	 <!--从购物车上选定商品，展示到订单上  -->
+	<select id="cartToOrder" parameterType="com.lishan.gjq.cart.Cart" resultMap="cart">
+	select c.gid,g.id,g.name,g.estoreprice,g.titleimage,c.buynum
+	from cart c,goods g where c.uid=#{uid} and c.gid=g.id
+	<if test="ids!=null and ids.size>0">
+		<foreach collection="ids" open="and c.gid in(" close=")" item="gid" separator=",">
+		 #{gid}
+		</foreach>
+		
+	</if>
+	</select>
+	
+	<!--删除选定商品的信息  -->
+	<delete id="deleteCartByCheck" parameterType="com.lishan.gjq.cart.Cart">
+	 delete *from cart where uid=#{uid}
+	 <if test="ids!=null and ids.size>0">
+	  <foreach collection="ids" open="and c.gid in(" close=")" item="id" separator=",">
+	  #{gid}
+	  </foreach>
+	 </if>
+	</delete>
+ </mapper>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8" ?>  
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"      
+ "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+ <mapper namespace="com.lishan.gjq.category.CategoryDao">
+ <!-- 
+  resultType可以把查询结果封装到pojo类型中，但是必需pojo类的属性名和查询到
+       的数据库表的字段名一致
+      如果sql查询到的字段与pojo的属性名一致，则需要使用resultMap将字段名和属性
+      名对应起来，进行手动配置封装，将结果映射到pojo中
+   resultMap可以实现将查询结果映射为复杂类型的pojo，比如在查询结果映射对象
+       包括pojo和list，实现一对一查询和一对多查询
+ -->
+ <!--
+ 	type就是指映射到哪一个pojo上， 
+ 	resultMap 的id 属性表示当前的 resultMap 在Mapper.xml文件中的代号(唯一)
+   -->
+   <!--配置商品类型的一对多的关联关系  -->
+   <resultMap type="com.lishan.gjq.category.Category" id="category">
+      <!--这里的id标签必须是作为主键的，如果一个表没有设置主键就不需要设置这个标签
+                      只需要配置result标签就可以了。
+        -->
+  		<id property="id" column="fid"/>
+  		<result property="type" column="ftype"></result>
+  		<result property="pid" column="fpid"></result>
+  <!--在collection中property是实体类中对应的属性名，他是一对多中“一”的属性
+     ofType是指定映射到集合中的全类名
+    -->
+   		<collection property="lists" ofType="com.lishan.gjq.category.Category">
+  		  <id property="id" column="zid"></id>
+  		  <result property="type" column="ztype"></result>
+  		  <result property="pid" column="zpid"/>
+  		</collection>
+   </resultMap>
+   <!--返回商品的所有类型  -->
+ 	<select id="getCategoryList" resultMap="category">
+ 	select a.id fid,a.type ftype,a.pid fpid,b.id zid,b.type ztype
+ 	from category a inner join category b on a.id=b.pid
+ 	</select>
+	<!--添加商品时的商品分类  -->
+	<select id="getCategory" parameterType="int" resultType="com.lishan.gjq.category.Category">
+	select * from category where pid=#{pid}
+	</select>
+
+ </mapper>
